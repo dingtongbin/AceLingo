@@ -16,6 +16,9 @@ dependencies = [
     "transformers>=5.16.1",
 ]
 
+[project.optional-dependencies]
+convert = ["torch>=2.0.0"]
+
 [project.scripts]
 acelingo = "acelingo:main"
 

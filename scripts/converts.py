@@ -1,6 +1,7 @@
 # convert_model.py
 import ctranslate2
 import ssl
+import torch  # noqa: F401 - ctranslate2 converter requires torch
 
 ssl._create_default_https_context = ssl._create_unverified_context
 
