@@ -1,0 +1,24 @@
+[project]
+name = "acelingo"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "dingtongbin", email = "3097838409@qq.com" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "ctranslate2>=4.8.2",
+    "keyboard>=0.13.5",
+    "pyside6>=6.11.2",
+    "rapidocr-onnxruntime>=1.4.4",
+    "sentencepiece>=0.2.2",
+    "transformers>=5.16.1",
+]
+
+[project.scripts]
+acelingo = "acelingo:main"
+
+[build-system]
+requires = ["uv_build>=0.12.7,<0.13.0"]
+build-backend = "uv_build"
