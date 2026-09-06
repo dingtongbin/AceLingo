@@ -23,12 +23,16 @@ jobs:
       - name: Install dependencies
         run: uv sync
 
-      - name: Install PyInstaller
-        run: uv pip install pyinstaller
+      - name: Install PyInstaller and UPX
+        run: |
+          uv pip install pyinstaller
+          # 下载 UPX
+          Invoke-WebRequest -Uri "https://github.com/upx/upx/releases/download/v4.2.4/upx-4.2.4-win64.zip" -OutFile upx.zip
+          Expand-Archive -Path upx.zip -DestinationPath .
+          Move-Item upx-4.2.4-win64\upx.exe .
 
       - name: Build EXE
-        run: |
-          uv run pyinstaller --onefile --name AceLingo --add-data "en-zh-int8;en-zh-int8" acelingo.py
+        run: uv run pyinstaller --clean acelingo.spec
 
       - name: Upload EXE to Release
         uses: softprops/action-gh-release@v2
@@ -42,7 +46,6 @@ jobs:
           copy dist\AceLingo.exe msix_root\
           copy LICENSE msix_root\
           copy logo.png msix_root\
-          # 创建 AppxManifest.xml
           $manifest = @"
           <?xml version="1.0" encoding="utf-8"?>
           <Package xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
@@ -95,12 +98,15 @@ jobs:
       - name: Install dependencies
         run: uv sync
 
-      - name: Install PyInstaller
-        run: uv pip install pyinstaller
+      - name: Install PyInstaller and UPX
+        run: |
+          uv pip install pyinstaller
+          wget -q https://github.com/upx/upx/releases/download/v4.2.4/upx-4.2.4-amd64_linux.tar.xz
+          tar -xf upx-4.2.4-amd64_linux.tar.xz
+          mv upx-4.2.4-amd64_linux/upx .
 
       - name: Build Linux binary
-        run: |
-          uv run pyinstaller --onefile --name AceLingo --add-data "en-zh-int8:en-zh-int8" acelingo.py
+        run: uv run pyinstaller --clean acelingo.spec
 
       - name: Upload Linux binary to Release
         uses: softprops/action-gh-release@v2
