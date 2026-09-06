@@ -776,6 +776,11 @@ class MainWindow(QMainWindow):
             child.setTextInteractionFlags(Qt.TextSelectableByMouse)
         dlg.exec()
 
+    def closeEvent(self, event):
+        """关闭窗口时隐藏到托盘，不退出"""
+        event.ignore()
+        self.hide()
+
     # 重写滚动事件，触发懒渲染
     def showEvent(self, event):
         super().showEvent(event)
@@ -784,7 +789,7 @@ class MainWindow(QMainWindow):
 
 # ================= 6. 托盘主程序 =================
 class TrayApp(QObject):
-    def __init__(self):
+    def __init__(self, icon=None):
         super().__init__()
         self.translator_model = None
         self.ocr_model = None
@@ -797,11 +802,13 @@ class TrayApp(QObject):
         self.app = QApplication.instance()
 
         self.win = MainWindow()
+        if icon:
+            self.win.setWindowIcon(icon)
         self.win.translate_requested.connect(self.on_translate)
         self.win.translate_stop_requested.connect(self.on_stop)
         self.win.show()
 
-        self.tray = QSystemTrayIcon()
+        self.tray = QSystemTrayIcon(icon if icon else QIcon())
         self.tray.setToolTip("AceLingo")
         self.tray.activated.connect(self.on_tray_click)
         self.tray.setVisible(True)
@@ -894,6 +901,8 @@ class TrayApp(QObject):
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     app.setApplicationName("AceLingo")
-    app.setQuitOnLastWindowClosed(True)
-    controller = TrayApp()
+    app.setQuitOnLastWindowClosed(False)
+    icon = QIcon(os.path.join(BASE_DIR, "logo.png"))
+    app.setWindowIcon(icon)
+    controller = TrayApp(icon)
     sys.exit(app.exec())

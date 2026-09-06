@@ -9,7 +9,74 @@ permissions:
   contents: write
 
 jobs:
-  build:
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+
+      - name: Set up Python
+        run: uv python install 3.12
+
+      - name: Install dependencies
+        run: uv sync
+
+      - name: Install PyInstaller
+        run: uv pip install pyinstaller
+
+      - name: Build EXE
+        run: |
+          uv run pyinstaller --onefile --name AceLingo --add-data "en-zh-int8;en-zh-int8" acelingo.py
+
+      - name: Upload EXE to Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/AceLingo.exe
+          generate_release_notes: false
+
+      - name: Build MSIX
+        run: |
+          mkdir -p msix_root
+          copy dist\AceLingo.exe msix_root\
+          copy LICENSE msix_root\
+          # 创建 AppxManifest.xml
+          $manifest = @"
+          <?xml version="1.0" encoding="utf-8"?>
+          <Package xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
+                   xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10">
+            <Identity Name="AceLingo" Publisher="CN=dingtongbin" Version="${{ github.ref_name }}.0" />
+            <Properties>
+              <DisplayName>AceLingo</DisplayName>
+              <PublisherDisplayName>dingtongbin</PublisherDisplayName>
+              <Logo>icon.png</Logo>
+            </Properties>
+            <Dependencies>
+              <TargetDeviceFamily Name="Windows.Desktop" MinVersion="10.0.17763.0" MaxVersionTested="10.0.19041.0" />
+            </Dependencies>
+            <Applications>
+              <Application Id="App" Executable="AceLingo.exe" EntryPoint="Windows.FullTrustApplication">
+                <uap:VisualElements DisplayName="AceLingo" Description="本地翻译工具" BackgroundColor="transparent" />
+              </Application>
+            </Applications>
+          </Package>
+          "@
+          $manifest | Out-File -Encoding utf8 msix_root\AppxManifest.xml
+          # 创建占位图标
+          New-Item -ItemType File -Path msix_root\icon.png -Force | Out-Null
+
+      - name: Create MSIX package
+        run: |
+          MakeAppx pack /d msix_root /p AceLingo.msix /o
+
+      - name: Upload MSIX as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: AceLingo-windows-msix
+          path: AceLingo.msix
+
+  build-linux:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -23,20 +90,15 @@ jobs:
       - name: Install dependencies
         run: uv sync
 
-      - name: Check syntax
-        run: uv run python -m py_compile acelingo.py
+      - name: Install PyInstaller
+        run: uv pip install pyinstaller
 
-      - name: Create dist
+      - name: Build Linux binary
         run: |
-          mkdir -p dist
-          cp acelingo.py dist/
-          cp pyproject.toml dist/
-          cp -r en-zh-int8 dist/
-          cp -r scripts dist/
-          tar -czf AceLingo-${{ github.ref_name }}-linux-x86_64.tar.gz -C dist .
+          uv run pyinstaller --onefile --name AceLingo --add-data "en-zh-int8:en-zh-int8" acelingo.py
 
-      - name: Create Release
+      - name: Upload Linux binary to Release
         uses: softprops/action-gh-release@v2
         with:
-          files: AceLingo-${{ github.ref_name }}-linux-x86_64.tar.gz
+          files: dist/AceLingo
           generate_release_notes: true
