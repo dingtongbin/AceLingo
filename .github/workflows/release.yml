@@ -41,16 +41,17 @@ jobs:
           mkdir -p msix_root
           copy dist\AceLingo.exe msix_root\
           copy LICENSE msix_root\
+          copy logo.png msix_root\
           # 创建 AppxManifest.xml
           $manifest = @"
           <?xml version="1.0" encoding="utf-8"?>
           <Package xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
                    xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10">
-            <Identity Name="AceLingo" Publisher="CN=dingtongbin" Version="${{ github.ref_name }}.0" />
+            <Identity Name="AceLingo" Publisher="CN=dingtongbin" Version="0.1.0.0" />
             <Properties>
               <DisplayName>AceLingo</DisplayName>
               <PublisherDisplayName>dingtongbin</PublisherDisplayName>
-              <Logo>icon.png</Logo>
+              <Logo>logo.png</Logo>
             </Properties>
             <Dependencies>
               <TargetDeviceFamily Name="Windows.Desktop" MinVersion="10.0.17763.0" MaxVersionTested="10.0.19041.0" />
@@ -63,12 +64,12 @@ jobs:
           </Package>
           "@
           $manifest | Out-File -Encoding utf8 msix_root\AppxManifest.xml
-          # 创建占位图标
-          New-Item -ItemType File -Path msix_root\icon.png -Force | Out-Null
 
       - name: Create MSIX package
         run: |
-          MakeAppx pack /d msix_root /p AceLingo.msix /o
+          $sdkPath = Get-ChildItem "C:\Program Files (x86)\Windows Kits\10\bin\10.*" | Sort-Object Name -Descending | Select-Object -First 1 -ExpandProperty FullName
+          $makeAppx = Join-Path $sdkPath "x64\MakeAppx.exe"
+          & $makeAppx pack /d msix_root /p AceLingo.msix /o
 
       - name: Upload MSIX as artifact
         uses: actions/upload-artifact@v4
