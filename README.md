@@ -41,4 +41,4 @@ uv run python acelingo.py
 
 ## 许可证
 
-GPL-3.0
+AGPL-3.0
