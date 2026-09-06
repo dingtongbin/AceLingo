@@ -23,16 +23,26 @@ jobs:
       - name: Install dependencies
         run: uv sync
 
-      - name: Install PyInstaller and UPX
-        run: |
-          uv pip install pyinstaller
-          # 下载 UPX
-          Invoke-WebRequest -Uri "https://github.com/upx/upx/releases/download/v4.2.4/upx-4.2.4-win64.zip" -OutFile upx.zip
-          Expand-Archive -Path upx.zip -DestinationPath .
-          Move-Item upx-4.2.4-win64\upx.exe .
+      - name: Install Nuitka
+        run: uv pip install nuitka ordered-set
 
       - name: Build EXE
-        run: uv run pyinstaller --clean acelingo.spec
+        run: |
+          uv run python -m nuitka \
+            --standalone \
+            --onefile \
+            --windows-console-mode=disable \
+            --windows-icon-from-ico=logo.png \
+            --include-data-dir=en-zh-int8=en-zh-int8 \
+            --include-data-files=logo.png=logo.png \
+            --company-name=dingtongbin \
+            --product-name=AceLingo \
+            --file-version=0.1.0 \
+            --product-version=0.1.0 \
+            --enable-plugin=pyside6 \
+            --nofollow-import-to=tkinter,unittest,xmlrpc,pydoc,doctest,lib2to3,ensurepip,idlelib,test,tests,setuptools,pip,wheel,distutils,matplotlib,PIL,cv2,torch,tensorflow,scipy,pandas \
+            --output-filename=AceLingo.exe \
+            acelingo.py
 
       - name: Upload EXE to Release
         uses: softprops/action-gh-release@v2
@@ -98,15 +108,21 @@ jobs:
       - name: Install dependencies
         run: uv sync
 
-      - name: Install PyInstaller and UPX
-        run: |
-          uv pip install pyinstaller
-          wget -q https://github.com/upx/upx/releases/download/v4.2.4/upx-4.2.4-amd64_linux.tar.xz
-          tar -xf upx-4.2.4-amd64_linux.tar.xz
-          mv upx-4.2.4-amd64_linux/upx .
+      - name: Install Nuitka
+        run: uv pip install nuitka ordered-set
 
       - name: Build Linux binary
-        run: uv run pyinstaller --clean acelingo.spec
+        run: |
+          uv run python -m nuitka \
+            --standalone \
+            --onefile \
+            --linux-icon=logo.png \
+            --include-data-dir=en-zh-int8=en-zh-int8 \
+            --include-data-files=logo.png=logo.png \
+            --enable-plugin=pyside6 \
+            --nofollow-import-to=tkinter,unittest,xmlrpc,pydoc,doctest,lib2to3,ensurepip,idlelib,test,tests,setuptools,pip,wheel,distutils,matplotlib,PIL,cv2,torch,tensorflow,scipy,pandas \
+            --output-filename=AceLingo \
+            acelingo.py
 
       - name: Upload Linux binary to Release
         uses: softprops/action-gh-release@v2
