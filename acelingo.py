@@ -776,6 +776,11 @@ class MainWindow(QMainWindow):
             child.setTextInteractionFlags(Qt.TextSelectableByMouse)
         dlg.exec()
 
+    def closeEvent(self, event):
+        """关闭窗口时隐藏到托盘，不退出"""
+        event.ignore()
+        self.hide()
+
     # 重写滚动事件，触发懒渲染
     def showEvent(self, event):
         super().showEvent(event)
@@ -896,7 +901,7 @@ class TrayApp(QObject):
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     app.setApplicationName("AceLingo")
-    app.setQuitOnLastWindowClosed(True)
+    app.setQuitOnLastWindowClosed(False)
     icon = QIcon(os.path.join(BASE_DIR, "logo.png"))
     app.setWindowIcon(icon)
     controller = TrayApp(icon)
