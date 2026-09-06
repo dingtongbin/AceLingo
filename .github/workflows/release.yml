@@ -58,7 +58,7 @@ jobs:
             </Dependencies>
             <Applications>
               <Application Id="App" Executable="AceLingo.exe" EntryPoint="Windows.FullTrustApplication">
-                <uap:VisualElements DisplayName="AceLingo" Description="本地翻译工具" BackgroundColor="transparent" />
+                <uap:VisualElements DisplayName="AceLingo" Description="本地翻译工具" BackgroundColor="transparent" Square150x150Logo="logo.png" Square44x44Logo="logo.png" />
               </Application>
             </Applications>
           </Package>
