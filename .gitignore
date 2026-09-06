@@ -87,8 +87,7 @@ ipython_config.py
 #   intended to run in multiple environments; otherwise, check them in:
 .python-version
 
-# Model files (downloaded separately)
-en-zh-int8/
+# Old model
 zh-en-int8/
 
 # pipenv

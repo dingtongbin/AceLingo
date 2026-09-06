@@ -21,10 +21,7 @@ jobs:
         run: uv python install 3.12
 
       - name: Install dependencies
-        run: uv sync --extra convert
-
-      - name: Download and convert model
-        run: uv run python scripts/converts.py
+        run: uv sync
 
       - name: Check syntax
         run: uv run python -m py_compile acelingo.py
